@@ -17,5 +17,8 @@ export const api = {
   seriesDetail: (id) => get('/series/' + id),
   leagues: () => get('/leagues'),
   rankings: (format) => get('/rankings?format=' + format),
-  news: () => get('/news')
+  news: () => get('/news'),
+  teams: () => get('/teams'),
+  archives: (q = '') => get('/archives' + q),
+  seriesPoints: (id) => get('/series/' + id + '/points')
 }

@@ -6,8 +6,10 @@ const links = [
   { to: '/live', label: 'Live Scores' },
   { to: '/schedule', label: 'Schedule' },
   { to: '/series', label: 'Series' },
+  { to: '/teams', label: 'Teams' },
   { to: '/leagues', label: 'Leagues' },
   { to: '/rankings', label: 'Rankings' },
+  { to: '/archives', label: 'Archives' },
   { to: '/news', label: 'News' }
 ]
 

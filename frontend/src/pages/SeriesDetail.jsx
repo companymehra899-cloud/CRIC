@@ -7,9 +7,11 @@ import { Loader } from '../components/Common'
 export default function SeriesDetail() {
   const { id } = useParams()
   const [data, setData] = useState(null)
+  const [points, setPoints] = useState(null)
 
   useEffect(() => {
     api.seriesDetail(id).then(setData).catch(() => setData(false))
+    api.seriesPoints(id).then(setPoints).catch(() => {})
   }, [id])
 
   if (data === null) return <Loader />
@@ -39,6 +41,42 @@ export default function SeriesDetail() {
         data.fixtures.map((m) => <MatchCard key={m.id} match={m} />)
       ) : (
         <div className="empty">No fixtures listed yet.</div>
+      )}
+
+      {points && points.table.length > 0 && (
+        <div className="section">
+          <div className="section-head">
+            <h2>Points Table</h2>
+          </div>
+          <div className="table-wrap">
+            <table className="rank-table">
+              <thead>
+                <tr>
+                  <th>Team</th>
+                  <th>P</th>
+                  <th>W</th>
+                  <th>L</th>
+                  <th>D</th>
+                  <th>NR</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {points.table.map((t) => (
+                  <tr key={t.short}>
+                    <td>{t.team}</td>
+                    <td>{t.played}</td>
+                    <td>{t.won}</td>
+                    <td>{t.lost}</td>
+                    <td>{t.drawn}</td>
+                    <td>{t.nr}</td>
+                    <td>{t.points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </div>
   )

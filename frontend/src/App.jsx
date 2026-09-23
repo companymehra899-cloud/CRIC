@@ -12,6 +12,8 @@ import Leagues from './pages/Leagues'
 import Rankings from './pages/Rankings'
 import News from './pages/News'
 import MatchDetail from './pages/MatchDetail'
+import Teams from './pages/Teams'
+import Archives from './pages/Archives'
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -44,8 +46,10 @@ export default function App() {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/series" element={<Series />} />
             <Route path="/series/:id" element={<SeriesDetail />} />
+            <Route path="/teams" element={<Teams />} />
             <Route path="/leagues" element={<Leagues />} />
             <Route path="/rankings" element={<Rankings />} />
+            <Route path="/archives" element={<Archives />} />
             <Route path="/news" element={<News />} />
             <Route path="/match/:id" element={<MatchDetail />} />
             <Route path="*" element={<div className="empty">Page not found.</div>} />

@@ -355,6 +355,22 @@ td .sub { display: block; font-size: 11px; color: var(--muted); font-weight: 500
 .rank-table th, .rank-table td { text-align: left; }
 .rank-table td:not(:first-child), .rank-table th:not(:first-child) { text-align: right; }
 
+.teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.team-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: transform .16s, border-color .16s;
+}
+.team-card:hover { border-color: var(--green); transform: translateY(-2px); }
+.team-card .team-info b { display: block; font-size: 14px; font-weight: 800; }
+.team-card .team-info small { color: var(--muted); font-size: 11px; }
+
 .empty {
   min-height: 116px;
   background: var(--card);

@@ -830,3 +830,17 @@ export const news = [
   { id: 7, title: 'Hetmyer rested for India ODIs; Kamil Pooran gets maiden T20I call-up', summary: 'West Indies have also rested Jason Holder for the T20Is between October 6 and 11.', category: 'West Indies', time: '5h ago' },
   { id: 8, title: 'BCB unveils six-team, three-format domestic competition', summary: 'The new structure will bring First-Class, List A and T20 cricket under one competition.', category: 'Bangladesh', time: '8h ago' }
 ]
+
+const teamCategoryMap = {
+  International: ['IND', 'JPN', 'ENG', 'SL', 'PAK', 'BAN', 'AUS', 'NZ', 'SA', 'WI', 'AFG', 'ZIM', 'IRE', 'NED', 'SCO', 'NEP', 'OMA', 'USA', 'NAM', 'HK', 'PNG', 'UAE'],
+  Women: ['INDW', 'SLW', 'PAKW', 'BANW', 'ENGW', 'AUSW'],
+  League: ['CSK', 'MI', 'RCB', 'KKR', 'LQ', 'KK', 'SS', 'PS', 'TKR', 'BR', 'DC', 'ADKR'],
+  Domestic: ['INDA', 'AUSA', 'QL', 'NSW', 'TAS', 'SAUS', 'KENT', 'SUR', 'LAN', 'KM', 'BT']
+}
+
+export const teamList = Object.entries(teamCategoryMap).flatMap(([category, shorts]) =>
+  shorts.map(short => {
+    const team = Object.values(teams).find(t => t.short === short)
+    return team ? { ...team, category } : null
+  }).filter(Boolean)
+)

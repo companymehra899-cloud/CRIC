@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { hasApiKey } from './config.js'
-import { leagues, rankings, news, matches as mockMatches, series as mockSeries } from './data.js'
+import { leagues, rankings, news, matches as mockMatches, series as mockSeries, teamList } from './data.js'
 import {
   cacheInfo,
   getAllMatches,
@@ -159,6 +159,49 @@ app.get('/api/rankings', (req, res) => {
 })
 
 app.get('/api/news', (_req, res) => res.json({ count: news.length, news }))
+
+app.get('/api/teams', (req, res) => {
+  const { category } = req.query
+  let out = teamList
+  if (category) out = out.filter((t) => t.category === category)
+  res.json({ count: out.length, teams: out })
+})
+
+app.get('/api/archives', (req, res) => {
+  const { format } = req.query
+  let completed = mockMatches.filter((m) => m.status === 'completed')
+  if (format) completed = completed.filter((m) => m.format === format)
+  const bySeries = {}
+  for (const m of completed) {
+    if (!bySeries[m.seriesId]) bySeries[m.seriesId] = { series: m.series, seriesId: m.seriesId, matches: [] }
+    bySeries[m.seriesId].matches.push(mockShape(m))
+  }
+  res.json({ count: completed.length, archives: Object.values(bySeries) })
+})
+
+app.get('/api/series/:id/points', (req, res) => {
+  const seriesMatches = mockMatches.filter((m) => m.seriesId === req.params.id && m.status === 'completed')
+  const table = {}
+  for (const m of seriesMatches) {
+    for (const t of m.teams) {
+      if (!table[t.short]) table[t.short] = { team: t.name, short: t.short, flag: t.flag, played: 0, won: 0, lost: 0, drawn: 0, nr: 0, points: 0 }
+    }
+    const [a, b] = m.teams
+    const ta = table[a.short], tb = table[b.short]
+    if (m.winner) {
+      ta.played++; tb.played++
+      if (m.winner === a.name) { ta.won++; tb.lost++; ta.points += 2 }
+      else if (m.winner === b.name) { tb.won++; ta.lost++; tb.points += 2 }
+      else { ta.drawn++; tb.drawn++; ta.points++; tb.points++ }
+    } else if (m.note && m.note.toLowerCase().includes('abandoned')) {
+      ta.played++; tb.played++; ta.nr++; tb.nr++; ta.points++; tb.points++
+    } else {
+      ta.played++; tb.played++; ta.drawn++; tb.drawn++; ta.points++; tb.points++
+    }
+  }
+  const result = Object.values(table).sort((x, y) => y.points - x.points || y.won - x.won)
+  res.json({ seriesId: req.params.id, table: result })
+})
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`CrickPulse API running on http://0.0.0.0:${PORT} (cricket API key: ${hasApiKey ? 'loaded' : 'missing'})`)
