@@ -18,10 +18,7 @@ export default function Header() {
     <header className="header">
       <div className="container header-inner">
         <NavLink to="/" className="logo" onClick={() => setOpen(false)}>
-          <span className="logo-badge">C</span>
-          <span style={{ color: 'var(--text)' }}>
-            Crick<span>Pulse</span>
-          </span>
+          Crick<span>Pulse</span>
         </NavLink>
         <nav className={'nav' + (open ? ' open' : '')}>
           {links.map((l) => (
