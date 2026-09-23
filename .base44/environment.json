@@ -1,0 +1,13 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "CRICKET_API_KEY",
+      "description": "Optional API key from cricapi.com for live cricket data. Without it, the app falls back to bundled mock data. Obtain from https://www.cricapi.com/ after signing up.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": false
+    }
+  ]
+}
