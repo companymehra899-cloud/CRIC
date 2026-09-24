@@ -30,7 +30,7 @@ export default function Rankings() {
       ) : (
         <div className="rank-grid">
           <div className="table-wrap">
-            <h3 style={{ fontSize: 14, marginBottom: 10, color: 'var(--accent)' }}>Batting</h3>
+            <h3 style={{ fontSize: 14, marginBottom: 10, color: 'var(--brand-2)' }}>Batting</h3>
             <table className="rank-table">
               <thead>
                 <tr>
@@ -54,7 +54,7 @@ export default function Rankings() {
             </table>
           </div>
           <div className="table-wrap">
-            <h3 style={{ fontSize: 14, marginBottom: 10, color: 'var(--accent)' }}>Bowling</h3>
+            <h3 style={{ fontSize: 14, marginBottom: 10, color: 'var(--brand-2)' }}>Bowling</h3>
             <table className="rank-table">
               <thead>
                 <tr>

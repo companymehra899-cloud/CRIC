@@ -13,7 +13,7 @@ export default function MatchDetail() {
   }, [id])
 
   if (m === null) return <Loader />
-  if (m === false) return <div className="empty">Match not found. <Link to="/live" style={{ color: 'var(--green)' }}>Back to live scores</Link></div>
+  if (m === false) return <div className="empty">Match not found. <Link to="/live" style={{ color: 'var(--brand)' }}>Back to live scores</Link></div>
 
   return (
     <div>
@@ -90,7 +90,7 @@ export default function MatchDetail() {
                           <tr key={i}>
                             <td>
                               {b.name}
-                              {b.out ? <span className="sub">{b.how || 'out'}</span> : <span className="sub" style={{ color: 'var(--green)' }}>{b.how || 'not out'}</span>}
+                              {b.out ? <span className="sub">{b.how || 'out'}</span> : <span className="sub" style={{ color: 'var(--brand)' }}>{b.how || 'not out'}</span>}
                             </td>
                             <td>{b.runs}</td>
                             <td>{b.balls}</td>

@@ -29,7 +29,7 @@ export default function Series() {
         ))}
       </div>
       {list.map((s) => (
-        <Link to={`/series/${s.id}`} className="league-row" key={s.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 10 }}>
+        <Link to={`/series/${s.id}`} className="series-item" key={s.id}>
           <div className="league-logo">{s.format}</div>
           <div className="league-info">
             <b style={{ fontSize: 15 }}>{s.name}</b>

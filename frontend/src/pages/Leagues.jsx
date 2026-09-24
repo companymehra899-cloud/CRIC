@@ -42,7 +42,7 @@ export default function Leagues() {
                 <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3 }}>
                   {l.country} · {l.format}
                 </div>
-                <div style={{ color: 'var(--accent)', fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>{l.window}</div>
+                <div style={{ color: 'var(--brand-2)', fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>{l.window}</div>
               </div>
               <span className={'pill ' + (l.status === 'live' ? 'live' : l.status === 'completed' ? 'completed' : 'upcoming')}>
                 {l.status}

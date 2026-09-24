@@ -24,7 +24,7 @@ export default function News() {
               <span className="pill upcoming">{n.category}</span>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 8, lineHeight: 1.55 }}>{n.summary}</p>
-            <div style={{ color: 'var(--accent)', fontSize: 11.5, marginTop: 8, fontWeight: 600 }}>{n.time}</div>
+            <div style={{ color: 'var(--brand-2)', fontSize: 11.5, marginTop: 8, fontWeight: 600 }}>{n.time}</div>
           </div>
         ))}
       </div>

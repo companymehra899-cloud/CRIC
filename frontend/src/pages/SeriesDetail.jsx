@@ -31,7 +31,7 @@ export default function SeriesDetail() {
       </div>
       <div className="section-head">
         <h2>Fixtures & Results</h2>
-        <Link to="/series" style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>
+        <Link to="/series" style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700 }}>
           All Series
         </Link>
       </div>
