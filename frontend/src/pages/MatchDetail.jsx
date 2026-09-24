@@ -9,7 +9,17 @@ export default function MatchDetail() {
   const [tab, setTab] = useState('scorecard')
 
   useEffect(() => {
-    api.match(id).then(setM).catch(() => setM(false))
+    let t
+    const load = () =>
+      api
+        .match(id)
+        .then((d) => {
+          setM(d)
+          if (d && d.status === 'live') t = setTimeout(load, 60000)
+        })
+        .catch(() => setM(false))
+    load()
+    return () => clearTimeout(t)
   }, [id])
 
   if (m === null) return <Loader />
@@ -58,6 +68,9 @@ export default function MatchDetail() {
         </button>
         <button className={'tab' + (tab === 'commentary' ? ' active' : '')} onClick={() => setTab('commentary')}>
           Commentary
+        </button>
+        <button className={'tab' + (tab === 'squads' ? ' active' : '')} onClick={() => setTab('squads')}>
+          Squads
         </button>
         <button className={'tab' + (tab === 'info' ? ' active' : '')} onClick={() => setTab('info')}>
           Match Info
@@ -172,6 +185,44 @@ export default function MatchDetail() {
             ))
           ) : (
             <div className="empty">Ball-by-ball commentary will start with the first ball.</div>
+          )}
+        </div>
+      )}
+
+      {tab === 'squads' && (
+        <div className="squad-grid">
+          {m.squads && m.squads.length ? (
+            m.squads.map((s) => (
+              <div className="side-card" key={s.short || s.team}>
+                <div className="squad-team">
+                  {s.img ? <img src={s.img} alt="" width="24" height="24" /> : null}
+                  <b>{s.team}</b>
+                  <span className="sub">{s.players.length} players</span>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Role</th>
+                      <th>Bat</th>
+                      <th>Bowl</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {s.players.map((p, i) => (
+                      <tr key={p.id || i}>
+                        <td style={{ fontWeight: 600 }}>{p.name}</td>
+                        <td>{p.role}</td>
+                        <td>{p.battingStyle}</td>
+                        <td>{p.bowlingStyle}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          ) : (
+            <div className="empty">Squad not announced yet. It will appear once team line-ups are confirmed.</div>
           )}
         </div>
       )}

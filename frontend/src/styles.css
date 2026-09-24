@@ -302,6 +302,16 @@ td .sub { display: block; font-size: 10.5px; color: var(--muted); font-weight: 4
 .rank-table td:not(:first-child), .rank-table th:not(:first-child) { text-align: right; }
 .rank-pos { font-weight: 800; color: var(--muted); }
 
+/* ===== Squads ===== */
+.squad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.squad-team { display: flex; align-items: center; gap: 9px; padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+.squad-team b { font-size: 15px; }
+.squad-team .sub { margin-left: auto; font-size: 11px; color: var(--muted); }
+.squad-grid .side-card { padding: 0 0 6px; overflow: hidden; }
+.squad-grid table { margin-top: 0; }
+.squad-grid table th:first-child, .squad-grid table td:first-child { padding-left: 16px; }
+.squad-grid table th:last-child, .squad-grid table td:last-child { padding-right: 16px; }
+
 /* ===== States ===== */
 .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); }
 .loading { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }

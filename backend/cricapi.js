@@ -11,12 +11,16 @@ const BUDGET_FILE = path.join(CACHE_DIR, 'budget.json')
 const DAILY_LIMIT = 90
 
 const TTL = {
-  current: 8 * 60 * 1000,
-  cricScore: 8 * 60 * 1000,
-  matches: 60 * 60 * 1000,
+  current: 20 * 60 * 1000,
+  cricScore: 20 * 60 * 1000,
+  matches: 6 * 60 * 60 * 1000,
   series: 6 * 60 * 60 * 1000,
   seriesInfo: 6 * 60 * 60 * 1000,
-  matchInfo: 10 * 60 * 1000
+  matchInfo: 30 * 60 * 1000,
+  scorecard: 10 * 60 * 1000,
+  scorecardNeg: 30 * 60 * 1000,
+  squad: 24 * 60 * 60 * 1000,
+  squadNeg: 6 * 60 * 60 * 1000
 }
 
 const mem = new Map()
@@ -71,16 +75,46 @@ function cacheSet(key, value) {
   }
 }
 
+let chain = Promise.resolve()
+let lastAt = 0
+const MIN_GAP_MS = 1300
+
+function scheduled(task) {
+  const run = chain.then(async () => {
+    const wait = Math.max(0, lastAt + MIN_GAP_MS - Date.now())
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait))
+    try {
+      return await task()
+    } finally {
+      lastAt = Date.now()
+    }
+  })
+  chain = run.then(
+    () => {},
+    () => {}
+  )
+  return run
+}
+
+let blockedUntil = 0
+
 async function upstream(pathname) {
+  if (Date.now() < blockedUntil) throw new Error('api cooldown active')
   const sep = pathname.includes('?') ? '&' : '?'
   const url = `${API_BASE}/${pathname}${sep}apikey=${encodeURIComponent(CRICKET_API_KEY)}`
   const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
   if (!res.ok) throw new Error('upstream HTTP ' + res.status)
   const json = await res.json()
-  if (json.status === 'failure') throw new Error(json.reason || 'api failure')
+  if (json.status === 'failure') {
+    const reason = json.reason || 'api failure'
+    if (/blocked/i.test(reason)) blockedUntil = Date.now() + 15 * 60 * 1000
+    throw new Error(reason)
+  }
   if (!json.data) throw new Error('empty api response')
   return json.data
 }
+
+const upstreamQueued = (pathname) => scheduled(() => upstream(pathname))
 
 export async function fetchCached(key, ttlMs, pathname) {
   const rec = cacheGet(key)
@@ -92,13 +126,32 @@ export async function fetchCached(key, ttlMs, pathname) {
   }
 
   try {
-    const data = await upstream(pathname)
+    const data = await upstreamQueued(pathname)
     bumpBudget()
     cacheSet(key, data)
     return data
   } catch (err) {
     if (rec) return rec.value
     throw err
+  }
+}
+
+async function fetchCachedSoft(key, ttlMs, negTtlMs, pathname) {
+  const rec = cacheGet(key)
+  if (rec) {
+    const age = Date.now() - rec.time
+    const limit = rec.value === null ? negTtlMs : ttlMs
+    if (age < limit) return rec.value
+  }
+  if (readBudget().count >= DAILY_LIMIT) return rec ? rec.value : null
+  try {
+    const data = await upstreamQueued(pathname)
+    bumpBudget()
+    cacheSet(key, data)
+    return data
+  } catch {
+    cacheSet(key, null)
+    return null
   }
 }
 
@@ -326,18 +379,92 @@ export async function getMatchesList() {
 }
 
 export async function getAllMatches() {
-  const [cur, cs, ml] = await Promise.allSettled([getCurrent(), getCricScore(), getMatchesList()])
+  const [cur, ml] = await Promise.allSettled([getCurrent(), getMatchesList()])
   const list = []
-  for (const r of [cur, cs, ml]) if (r.status === 'fulfilled') list.push(...r.value)
+  for (const r of [cur, ml]) if (r.status === 'fulfilled') list.push(...r.value)
   return sortMatches(dedupe(list))
 }
 
+function extrasOf(e) {
+  if (!e || typeof e !== 'object') return 0
+  if (typeof e.total === 'number') return e.total
+  return ['b', 'lb', 'w', 'nb', 'p', 'penalty'].reduce((a, k) => a + (e[k] || 0), 0)
+}
+
+function normScorecard(sc, teams, summary = []) {
+  return (sc.scorecard || []).map((inn, idx) => {
+    const batting = (inn.batting || []).map((b) => {
+      const how = b['dismissal-text'] || (b.dismissal ? String(b.dismissal) : 'not out')
+      return {
+        name: (b.batsman && b.batsman.name) || 'Unknown',
+        runs: b.r ?? 0,
+        balls: b.b ?? 0,
+        fours: b['4s'] ?? 0,
+        sixes: b['6s'] ?? 0,
+        sr: b.sr ?? 0,
+        out: !/not out/i.test(how),
+        how
+      }
+    })
+    const bowling = (inn.bowling || []).map((b) => ({
+      name: (b.bowler && b.bowler.name) || 'Unknown',
+      overs: b.o ?? 0,
+      maidens: b.m ?? 0,
+      runs: b.r ?? 0,
+      wickets: b.w ?? 0,
+      econ: b.eco ?? 0
+    }))
+    const teamName = (inn.inning || '').replace(/\s*Inning.*$/i, '').trim()
+    let meta = (teams || []).find((t) => t.name.toLowerCase() === teamName.toLowerCase())
+    if (!meta) meta = (teams || []).find((t) => t.name.toLowerCase().startsWith(teamName.toLowerCase()) || teamName.toLowerCase().startsWith(t.name.toLowerCase()))
+    const teamShort = meta ? meta.short : shortOf(teamName)
+    const fallback = summary[idx] || summary.find((s) => s && s.team === teamShort) || {}
+    const totals = inn.totals || {}
+    const runs = totals.r ?? fallback.runs ?? batting.reduce((a, x) => a + (x.runs || 0), 0)
+    const wickets = totals.w ?? fallback.wickets ?? batting.filter((x) => x.out).length
+    const overs = totals.o ?? fallback.overs ?? 0
+    return {
+      team: teamShort,
+      innings: inn.inning || `${teamName} Innings`,
+      runs,
+      wickets,
+      overs,
+      runRate: overs > 0 ? Number(((runs || 0) / overs).toFixed(2)) : 0,
+      batting,
+      bowling,
+      extras: extrasOf(inn.extras),
+      fallOfWickets: []
+    }
+  })
+}
+
+function normSquad(sq) {
+  return (sq || []).map((t) => ({
+    team: t.teamName || '',
+    short: t.shortname || t.teamName || '',
+    img: t.img || '',
+    players: (t.players || []).map((p) => ({
+      id: p.id || '',
+      name: p.name || 'Unknown',
+      role: p.role || '',
+      battingStyle: p.battingStyle || '',
+      bowlingStyle: p.bowlingStyle || ''
+    }))
+  }))
+}
+
 export async function getMatchInfo(id) {
-  const m = await fetchCached('match_' + id, TTL.matchInfo, 'match_info?id=' + encodeURIComponent(id))
+  const [infoR, scR, sqR] = await Promise.allSettled([
+    fetchCached('match_' + id, TTL.matchInfo, 'match_info?id=' + encodeURIComponent(id)),
+    fetchCachedSoft('scorecard_' + id, TTL.scorecard, TTL.scorecardNeg, 'match_scorecard?id=' + encodeURIComponent(id)),
+    fetchCachedSoft('squad_' + id, TTL.squad, TTL.squadNeg, 'match_squad?id=' + encodeURIComponent(id))
+  ])
+  if (infoR.status !== 'fulfilled') throw infoR.reason
+
+  const m = infoR.value
   const normalized = normMatch(m)
   const scores = (m.score || []).map((s, idx) => {
     const team = normalized.score[idx] ? normalized.score[idx].team : ''
-    const inningNo = ((s.inning || '').match(/Inning\s*(\d+)/i) || [])[1]
     const overs = s.o || 0
     return {
       team,
@@ -352,7 +479,21 @@ export async function getMatchInfo(id) {
       fallOfWickets: []
     }
   })
-  return { ...normalized, scores, commentary: [], fullScorecard: false }
+
+  let full = null
+  if (scR.status === 'fulfilled' && scR.value) {
+    const parsed = normScorecard(scR.value, normalized.teams, scores)
+    if (parsed.some((p) => p.batting.length)) full = parsed
+  }
+  const squads = sqR.status === 'fulfilled' && sqR.value ? normSquad(sqR.value) : []
+
+  return {
+    ...normalized,
+    scores: full || scores,
+    squads,
+    commentary: [],
+    fullScorecard: Boolean(full)
+  }
 }
 
 export async function getSeriesList() {

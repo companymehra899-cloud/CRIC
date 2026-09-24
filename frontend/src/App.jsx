@@ -28,7 +28,7 @@ export default function App() {
   useEffect(() => {
     const load = () => api.live().then((d) => setLive(d.matches)).catch(() => {})
     load()
-    const t = setInterval(load, 30000)
+    const t = setInterval(load, 60000)
     return () => clearInterval(t)
   }, [])
 
