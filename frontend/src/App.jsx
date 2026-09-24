@@ -3,15 +3,7 @@ import { Routes, Route, useLocation, NavLink } from 'react-router-dom'
 import Header from './components/Header'
 import { LiveTicker } from './components/Common'
 import { api } from './api/client'
-import {
-  IconBall,
-  IconLive,
-  IconCalendar,
-  IconTrophy,
-  IconGlobe,
-  IconChart,
-  IconNews
-} from './components/Icons'
+import { IconBall } from './components/Icons'
 import Home from './pages/Home'
 import LiveScores from './pages/LiveScores'
 import Schedule from './pages/Schedule'
@@ -29,14 +21,6 @@ function ScrollTop() {
   }, [pathname])
   return null
 }
-
-const mobileLinks = [
-  { to: '/', label: 'Home', Icon: IconBall, end: true },
-  { to: '/live', label: 'Live', Icon: IconLive },
-  { to: '/schedule', label: 'Schedule', Icon: IconCalendar },
-  { to: '/series', label: 'Series', Icon: IconTrophy },
-  { to: '/rankings', label: 'Rankings', Icon: IconChart }
-]
 
 export default function App() {
   const [live, setLive] = useState([])
@@ -104,15 +88,6 @@ export default function App() {
           <div className="footer-bottom">© 2026 CrickPulse · Data provided for demonstration purposes.</div>
         </div>
       </footer>
-
-      <nav className="mobile-nav">
-        {mobileLinks.map(({ to, label, Icon, end }) => (
-          <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
-            <Icon />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
     </div>
   )
 }
