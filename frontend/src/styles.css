@@ -91,6 +91,7 @@ svg { flex-shrink: 0; }
 .menu-btn {
   display: none; background: var(--surface); border: 1px solid var(--border);
   color: var(--text); border-radius: 10px; padding: 8px 11px; line-height: 0;
+  margin-left: auto;
 }
 
 /* ===== Ticker ===== */
