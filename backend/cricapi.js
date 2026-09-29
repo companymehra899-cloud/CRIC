@@ -12,7 +12,6 @@ const DAILY_LIMIT = 90
 
 const TTL = {
   current: 20 * 60 * 1000,
-  cricScore: 20 * 60 * 1000,
   matches: 6 * 60 * 60 * 1000,
   series: 6 * 60 * 60 * 1000,
   seriesInfo: 6 * 60 * 60 * 1000,
@@ -269,57 +268,6 @@ export function normMatch(m) {
   }
 }
 
-function parseTeamLabel(label) {
-  const m = (label || '').match(/^(.*?)\s*\[([^\]]+)\]\s*$/)
-  if (m) return { name: m[1].trim(), short: m[2].trim() }
-  return { name: (label || '').trim(), short: (label || '').trim().slice(0, 4).toUpperCase() }
-}
-
-function parseScoreLine(line, short, innings) {
-  const m = (line || '').match(/(\d+)(?:\/(\d+))?\s*(?:\(([\d.]+)\))?/)
-  if (!m) return { team: short, runs: 0, wickets: 0, overs: 0, innings }
-  return {
-    team: short,
-    runs: Number(m[1]),
-    wickets: m[2] !== undefined ? Number(m[2]) : 0,
-    overs: m[3] ? Number(m[3]) : 0,
-    innings
-  }
-}
-
-export function normCricScore(m) {
-  const t1 = parseTeamLabel(m.t1)
-  const t2 = parseTeamLabel(m.t2)
-  const teams = [
-    { short: t1.short, name: t1.name, img: m.t1img || '', flag: '' },
-    { short: t2.short, name: t2.name, img: m.t2img || '', flag: '' }
-  ]
-  const score = []
-  if (m.t1s) score.push(parseScoreLine(m.t1s, t1.short, 1))
-  if (m.t2s) score.push(parseScoreLine(m.t2s, t2.short, 2))
-  const status = m.ms === 'live' ? 'live' : m.ms === 'result' ? 'completed' : 'upcoming'
-  const { format, formatLabel } = fmtOf(m.matchType)
-  return {
-    id: m.id,
-    status,
-    state: m.status || '',
-    format,
-    formatLabel,
-    category: classify(m.series, [t1.name, t2.name]),
-    series: m.series || '',
-    seriesId: '',
-    matchNo: '',
-    venue: '',
-    startTime: toIso(m.dateTimeGMT),
-    teams,
-    score,
-    note: m.status || '',
-    city: '',
-    toss: '',
-    winner: ''
-  }
-}
-
 export function normSeries(s) {
   const counts = { odi: s.odi || 0, t20: s.t20 || 0, test: s.test || 0 }
   const main = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
@@ -366,11 +314,6 @@ function sortMatches(list) {
 export async function getCurrent() {
   const data = await fetchCached('currentMatches', TTL.current, 'currentMatches?offset=0')
   return data.map(normMatch)
-}
-
-export async function getCricScore() {
-  const data = await fetchCached('cricScore', TTL.cricScore, 'cricScore')
-  return data.map(normCricScore)
 }
 
 export async function getMatchesList() {

@@ -9,8 +9,6 @@ async function get(path) {
 export const api = {
   home: () => get('/home'),
   live: () => get('/matches/live'),
-  upcoming: () => get('/matches/upcoming'),
-  completed: () => get('/matches/completed'),
   matches: (q = '') => get('/matches' + q),
   match: (id) => get('/matches/' + id),
   series: () => get('/series'),

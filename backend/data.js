@@ -1,6 +1,6 @@
 const T = (short, name, flag) => ({ short, name, flag })
 
-export const teams = {
+const teams = {
   IND: T('IND', 'India', 'IN'),
   JPN: T('JPN', 'Japan', 'JP'),
   ENG: T('ENG', 'England', 'GB'),

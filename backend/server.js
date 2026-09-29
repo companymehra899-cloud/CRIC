@@ -94,22 +94,6 @@ app.get('/api/matches/live', async (_req, res) => {
   res.json({ count: list.length, matches: list })
 })
 
-app.get('/api/matches/upcoming', async (_req, res) => {
-  const list = await withFallback(async () => {
-    const all = await getAllMatches()
-    return all.filter((m) => m.status === 'upcoming')
-  }, mockUpcoming)
-  res.json({ count: list.length, matches: list })
-})
-
-app.get('/api/matches/completed', async (_req, res) => {
-  const list = await withFallback(async () => {
-    const all = await getAllMatches()
-    return all.filter((m) => m.status === 'completed')
-  }, mockCompleted)
-  res.json({ count: list.length, matches: list })
-})
-
 app.get('/api/matches/:id', async (req, res) => {
   try {
     const match = await withFallback(() => getMatchInfo(req.params.id), () => {

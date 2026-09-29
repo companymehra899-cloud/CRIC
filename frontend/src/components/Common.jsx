@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IconLive, IconCheck } from './Icons'
+import { IconLive } from './Icons'
 
 export function Flag({ team, className = 'flag', style }) {
   const [failed, setFailed] = useState(false)
@@ -73,12 +73,4 @@ export function Loader({ count = 4 }) {
       ))}
     </div>
   )
-}
-
-export function Empty({ text = 'Nothing here yet.' }) {
-  return <div className="empty">{text}</div>
-}
-
-export function Check() {
-  return <IconCheck width={14} height={14} />
 }

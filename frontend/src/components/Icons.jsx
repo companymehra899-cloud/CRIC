@@ -72,12 +72,6 @@ export const IconChevron = (p) => (
   </svg>
 )
 
-export const IconCheck = (p) => (
-  <svg {...base} {...p}>
-    <path d="M20 6 9 17l-5-5" />
-  </svg>
-)
-
 export const IconMenu = (p) => (
   <svg {...base} {...p}>
     <path d="M4 7h16M4 12h16M4 17h16" />
